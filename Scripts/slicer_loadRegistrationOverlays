@@ -1,0 +1,49 @@
+# Load all registration output for 1 scan
+import os
+
+coltable = slicer.util.loadColorTable("/home2/rachel/P01/MagaLab/MEMOS_simplified/KOMP2_simple.ctbl")
+
+imgdir = "/home2/rachel/P01/MagaLab/Data/RigidAligned/lowRes_Volumes/"
+labeldir = "/home2/rachel/P01/MagaLab/Data/RigidAligned/lowRes_15Labels/"
+
+def loadRegResults(subject, experiment, dir1 = imgdir, dir2 = labeldir, col = coltable):
+	regdir = "/home2/rachel/P01/Github/RegComparison/Results/" + experiment + "/Transforms/"
+	
+	# Template volume and labels
+	templateVol = "/home2/rachel/P01/MagaLab/Data/RigidAligned/maskedtemplate0__lowRes.nii.gz"
+	templateLabel = "/home2/rachel/P01/MagaLab/Data/RigidAligned/maskedtemplate0__lowRes-15-label.nii.gz"
+	slicer.util.loadVolume(templateVol, {"colorNodeID": "vtkMRMLColorTableNodeCyan"})
+	slicer.util.loadSegmentation(templateLabel, {'colorNodeID': col.GetID()})
+	
+	# Subject image in rigid space gray
+	imgpath = dir1 + subject + "__rec-18um-tx-low.nrrd"
+	slicer.util.loadVolume(imgpath, {"colorNodeID": "vtkMRMLColorTableNodeGrey"})
+	
+	# Subject labels in rigid space
+	labelpath = dir2 + subject + "__tx-low-15-label.nii.gz"
+	slicer.util.loadSegmentation(labelpath, {'colorNodeID': col.GetID()})
+	
+	# Inverse-transformed labels
+	invlabelpath = regdir + subject + "_" + experiment + "_inverse-label.nii.gz"
+	slicer.util.loadSegmentation(invlabelpath, {'colorNodeID': col.GetID()})
+	
+	# Subject image in rigid space yellow
+	imgpath = dir1 + subject + "__rec-18um-tx-low.nrrd"
+	slicer.util.loadVolume(imgpath, {"colorNodeID": "vtkMRMLColorTableNodeYellow"})
+	
+	# Linear-transformed subject image
+	linearTxImgPath = regdir + subject + "_" + experiment + "_Step1_linearTx_fwdWarpedImage.nrrd"
+	slicer.util.loadVolume(linearTxImgPath, {"colorNodeID": "vtkMRMLColorTableNodeYellow"})
+	
+	# Linear+Warp1-transformed subject image
+	warp1TxImgPath = regdir + subject + "_" + experiment + "_Step2_Warp1Tx_fwdWarpedImage.nrrd"
+	slicer.util.loadVolume(warp1TxImgPath, {"colorNodeID": "vtkMRMLColorTableNodeYellow"})
+	
+	# Linear+Warp1+Warp2- tranformed subject image
+	warp2TxImgPath = regdir + subject + "_" + experiment + "_Step3_Warp2Tx_fwdWarpedImage.nrrd"
+	
+	if os.path.exists(warp2TxImgPath):
+		slicer.util.loadVolume(warp2TxImgPath, {"colorNodeID": "vtkMRMLColorTableNodeYellow"})
+
+
+
