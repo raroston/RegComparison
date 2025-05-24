@@ -6,9 +6,9 @@ library(viridis)
 setwd("/home2/rachel/P01/Github/RegComparison/")
 
 # Input Variables
-experiment = "Exp04"
-transformPattern = "combinedWarps"
-resultSubdir = "PCA-combinedWarps"
+experiment = "Exp01"
+transformPattern = "1Warp"
+resultSubdir = "PCA-1Warp"
 makePlots = TRUE
 
 # Output directory
@@ -23,8 +23,11 @@ txName1 = transformPattern
 specimen.database = read.csv("./Data/scan_metadata.csv")
 ref.img.path = "/home2/rachel/P01/MagaLab/Data/RigidAligned/maskedtemplate0__lowRes.nii.gz"
 ref.mask.path = "/home2/rachel/P01/MagaLab/Data/RigidAligned/maskedtemplate0__lowRes-wholebody-label.nii.gz"
+ref.label.path = "/home2/rachel/P01/MagaLab/Data/RigidAligned/maskedtemplate0__lowRes-15-label.nii.gz"
+
 ref.img = antsImageRead(ref.img.path)
 ref.mask = antsImageRead(ref.mask.path)
+ref.label = antsImageRead(ref.label.path)
 
 # Organize metadata
 transformpaths = dir(transform.dir1, pattern = txName1, full.names = T)
@@ -159,19 +162,35 @@ if(makePlots == TRUE
     dev.off()
   }
   
-  # PC1 Deformations
-  PC1_warpedImg.dir = paste0(plot.dir, "/PC1_warpedTemplate/")
-  if(!dir.exists(PC1_warpedImg.dir))dir.create(PC1_warpedImg.dir)
+  # PC Deformations
+  PCs = 1:4
+  PC_warpedImg.dir = paste0(plot.dir, "/PC_warpedTemplate/")
+  if(!dir.exists(PC_warpedImg.dir))dir.create(PC_warpedImg.dir)
+  scales = 100*(c(-8:-1,1:8))
   
-  scales = 100*(1:8)
-  warped = list()
-  for(j in 1:length(scales)){
-    PC1_scale = scales[j]
-    upscaled = vectorToMultichannel(PC1_scale*pca$pca$v[,1], pca_mask)   #this should be the mask you used for your PCA
-    upscaledTX = antsrTransformFromDisplacementField(upscaled)
-    warped[[j]] = applyAntsrTransform(upscaledTX, data=ref.img,reference= ref.img)
-    antsImageWrite(warped[[j]], paste0(PC1_warpedImg.dir, "PC1_x", PC1_scale, "_", experiment, ".nrrd"))
+  for(i in PCs){
+    pc = i
+    
+    warped.img = list()
+    warped.label = list()
+    for(j in 1:length(scales)){
+      PC_scale = scales[j]
+      upscaled = vectorToMultichannel(PC_scale*pca$pca$v[,i], pca_mask)   #this should be the mask you used for your PCA
+      upscaledTX = antsrTransformFromDisplacementField(upscaled)
+      warped.img[[j]] = applyAntsrTransform(upscaledTX, 
+                                            data=ref.img,
+                                            reference= ref.img, 
+                                            interpolation = "linear")
+      warped.label[[j]] = applyAntsrTransform(upscaledTX, 
+                                              data = ref.label,
+                                              reference= ref.label, 
+                                              interpolation = "nearestNeighbor")
+      antsImageWrite(warped.img[[j]], paste0(PC_warpedImg.dir, "PC", pc, "_x", PC_scale, "_", experiment, ".nrrd"))
+      antsImageWrite(warped.label[[j]], paste0(PC_warpedImg.dir, "PC", pc, "_x", PC_scale, "_", experiment, "-label.nii.gz"))
+    }
+    
   }
+  
 }
 
 rm(list = ls())

@@ -1,0 +1,21 @@
+expList = ["Exp01", "Exp02", "Exp03", "Exp04"]
+magnification = "700"
+coltable = slicer.util.loadColorTable("/home2/rachel/P01/MagaLab/MEMOS_simplified/KOMP2_simple.ctbl")
+
+for experiment in expList:
+	dir = "/home2/rachel/P01/Github/RegComparison/Results/" + experiment + "/PCA-allFwdTx/plots/PC_warpedTemplate/"
+	
+	for pc in ["1","2","3","4"]:
+		imgpath1 = dir + "PC" + pc +"_x-" + magnification + "_" + experiment + ".nrrd"
+		slicer.util.loadVolume(imgpath1, {"colorNodeID": "vtkMRMLColorTableNodeGrey"})
+		imgpath2 = dir + "PC" + pc +"_x" + magnification + "_" + experiment + ".nrrd"
+		slicer.util.loadVolume(imgpath2, {"colorNodeID": "vtkMRMLColorTableNodeGrey"})
+		
+for experiment in expList:
+	dir = "/home2/rachel/P01/Github/RegComparison/Results/" + experiment + "/PCA-allFwdTx/plots/PC_warpedTemplate/"
+	
+	for pc in ["1","2","3","4"]:
+		labelpath1 = dir + "PC" + pc +"_x-" + magnification + "_" + experiment + "-label.nii.gz"
+		slicer.util.loadVolume(labelpath1, {"labelmap": True}, {'colorNodeID': coltable})
+		labelpath2 = dir + "PC" + pc +"_x" + magnification + "_" + experiment + "-label.nii.gz"
+		slicer.util.loadVolume(labelpath2, {"labelmap": True}, {'colorNodeID': coltable})

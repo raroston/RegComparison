@@ -1,5 +1,6 @@
+import os
 
-
+expList = ["Exp01", "Exp02", "Exp03", "Exp04"]
 
 coltable = slicer.util.loadColorTable("/home2/rachel/P01/MagaLab/MEMOS_simplified/KOMP2_simple.ctbl")
 
@@ -31,7 +32,7 @@ def loadInvLabels(subject, experiments, col = coltable):
 		slicer.util.loadSegmentation(invlabelpath, {'colorNodeID': col.GetID()})
 		
 
-def multiLoadRegResults(subjects, experiments = expList):
+def multiLoadRegResults(subject, experiments = expList, dir1 = imgdir):
 	# Subject image in rigid space yellow
 	imgpath = dir1 + subject + "__rec-18um-tx-low.nrrd"
 	slicer.util.loadVolume(imgpath, {"colorNodeID": "vtkMRMLColorTableNodeYellow"})
